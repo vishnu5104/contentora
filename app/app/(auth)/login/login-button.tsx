@@ -6,6 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
 export default function LoginButton() {
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
