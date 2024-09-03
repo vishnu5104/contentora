@@ -12,51 +12,55 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-export const users = pgTable("users", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => createId()),
+export const users = pgTable("user", {
+  id: text("id").notNull().primaryKey(),
   name: text("name"),
-  // if you are using Github OAuth, you can get rid of the username attribute (that is for Twitter OAuth)
-  username: text("username"),
-  gh_username: text("gh_username"),
-  email: text("email"),
+  address: text("address").unique(),
+  email: text("email").unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
-  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt", { mode: "date" })
-    .notNull()
-    .$onUpdate(() => new Date()),
 });
 
-export const sessions = pgTable(
-  "sessions",
+export const accounts = pgTable(
+  "account",
   {
-    sessionToken: text("sessionToken").primaryKey(),
     userId: text("userId")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
   },
-  (table) => {
-    return {
-      userIdIdx: index().on(table.userId),
-    };
-  },
+  (account) => ({
+    compoundKey: primaryKey(account.provider, account.providerAccountId),
+  }),
 );
 
+export const sessions = pgTable("session", {
+  sessionToken: text("sessionToken").notNull().primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
+});
+
 export const verificationTokens = pgTable(
-  "verificationTokens",
+  "verificationToken",
   {
     identifier: text("identifier").notNull(),
-    token: text("token").notNull().unique(),
+    token: text("token").notNull(),
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
-  (table) => {
-    return {
-      compositePk: primaryKey({ columns: [table.identifier, table.token] }),
-    };
-  },
+  (vt) => ({
+    compoundKey: primaryKey(vt.identifier, vt.token),
+  }),
 );
 
 export const examples = pgTable("examples", {
@@ -68,36 +72,6 @@ export const examples = pgTable("examples", {
   image: text("image"),
   imageBlurhash: text("imageBlurhash"),
 });
-
-export const accounts = pgTable(
-  "accounts",
-  {
-    userId: text("userId")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    type: text("type").notNull(),
-    provider: text("provider").notNull(),
-    providerAccountId: text("providerAccountId").notNull(),
-    refresh_token: text("refresh_token"),
-    refreshTokenExpiresIn: integer("refresh_token_expires_in"),
-    access_token: text("access_token"),
-    expires_at: integer("expires_at"),
-    token_type: text("token_type"),
-    scope: text("scope"),
-    id_token: text("id_token"),
-    session_state: text("session_state"),
-    oauth_token_secret: text("oauth_token_secret"),
-    oauth_token: text("oauth_token"),
-  },
-  (table) => {
-    return {
-      userIdIdx: index().on(table.userId),
-      compositePk: primaryKey({
-        columns: [table.provider, table.providerAccountId],
-      }),
-    };
-  },
-);
 
 export const sites = pgTable(
   "sites",

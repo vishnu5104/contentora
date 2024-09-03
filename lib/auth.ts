@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
         // or perform additional verification steps
         // make her the address instead of email id
         const user = await db.query.users.findFirst({
-          where: (users, { eq }) => eq(users.email, credentials.address),
+          where: (users, { eq }) => eq(users.address, credentials.address),
         });
 
         console.log("work here ", user);
@@ -34,6 +34,7 @@ export const authOptions: NextAuthOptions = {
           const newUser = await db
             .insert(users)
             .values({
+              id: crypto.randomUUID(),
               address: credentials.address,
               name: `User ${credentials.address.slice(0, 6)}`,
             })
@@ -50,10 +51,10 @@ export const authOptions: NextAuthOptions = {
     error: "/login", // Error code passed in query string as ?error=
   },
   adapter: DrizzleAdapter(db, {
-    usersTable: users,
-    accountsTable: accounts,
-    sessionsTable: sessions,
-    verificationTokensTable: verificationTokens,
+    users,
+    accounts,
+    sessions,
+    verificationTokens,
   }) as Adapter,
   session: { strategy: "jwt" },
   cookies: {
