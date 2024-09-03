@@ -104,36 +104,6 @@ export default async function SitePostPage({
             {data.description}
           </p>
         </div>
-        <a
-          // if you are using Github OAuth, you can get rid of the Twitter option
-          href={
-            data.site?.user?.username
-              ? `https://twitter.com/${data.site.user.username}`
-              : `https://github.com/${data.site?.user?.gh_username}`
-          }
-          rel="noreferrer"
-          target="_blank"
-        >
-          <div className="my-8">
-            <div className="relative inline-block h-8 w-8 overflow-hidden rounded-full align-middle md:h-12 md:w-12">
-              {data.site?.user?.image ? (
-                <BlurImage
-                  alt={data.site?.user?.name ?? "User Avatar"}
-                  height={80}
-                  src={data.site.user.image}
-                  width={80}
-                />
-              ) : (
-                <div className="absolute flex h-full w-full select-none items-center justify-center bg-stone-100 text-4xl text-stone-500">
-                  ?
-                </div>
-              )}
-            </div>
-            <div className="text-md ml-3 inline-block align-middle md:text-lg dark:text-white">
-              by <span className="font-semibold">{data.site?.user?.name}</span>
-            </div>
-          </div>
-        </a>
       </div>
       <div className="relative m-auto mb-10 h-80 w-full max-w-screen-lg overflow-hidden md:mb-20 md:h-150 md:w-5/6 md:rounded-2xl lg:w-2/3">
         <BlurImage
